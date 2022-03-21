@@ -100,13 +100,15 @@ public class WebPoker extends WebSocketServer {
 
   @Override
   public void onClose(WebSocket conn, int code, String reason, boolean remote) {
+    numPlayers -= 1;
+    
     broadcast(conn + " has closed");
     System.out.println(conn + " has closed");
   }
 
   @Override
   public void onMessage(WebSocket conn, String message) {
-
+    System.out.println("onMessage received");
     // all incoming messages are processed by the game
     game.processMessage(message);
     // and the results of that message are sent to everyone

@@ -3,41 +3,34 @@
 <meta charset="utf-8">
 
 <head>
-  <title>CSE3310 Websocket Example</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>WebPoker Game</title>
+  <link rel = "stylesheet" href="styles.css" >
+  <p class = "title" > Welcome to our WebPoker Game!</p>
 
 </head>
 
 <body>
-  <p> this is an example to show how websockets work for a class demonstration.</p>
-  <p>message: <input id="send_text" type="text">
-    <input type="button" name="send_button" value="send" onclick="send()">
-  </p>
-  <div id="nameInput">
-    <p>name: <input id="sendName" type="text">
-      <input type="button" name="sendName" value="Name" onclick="sendName()">
-    </p>
+  <div class = "row">
+    <div class = "column" id = "player1" style = "display:none">
+      <img src = "PlayerPicture.png" style = "width:25%">
+      <p class = "player_name">name here</p>
+    </div>
   </div>
-
-  <img id="card1" src="3C.svg" style="width:auto;">
-  <img id="card2" src="3D.svg" style="width:auto;">
-  <img id="card3" src="3H.svg" style="width:auto;">
-  <img id="card4" src="4C.svg" style="width:auto;">
-  <img id="card5" src="5C.svg" style="width:auto;">
-  <p>        
-    <input type = "button" name = "fold_button" value = "fold" onclick = "fold()">
-    <input type = "button" name = "raise_button" value = "raise" onclick = "raise()">
-    <input type = "button" name = "check_button" value = "check" onclick = "check()">
+  <p class = "lobby">
+    <input class = "input_box" id="send_name" type="text" placeholder = "Enter name here">
+    <input class = "lobby_button" id = "join_button" type="button" name="join_button" value="Join" onclick="join()">
+    <input class = "lobby_button" id = "tutorial_button" type="button" name="tutorial_button" value="Tutorial" onclick="tutorial()">
   </p>
-  <div class = "textbox" id="textbox">
-    <span id = "wallet">Money: 0</span>
-  </div>
 
+  <div class = "gameStatus" id="gameStatus">
+    <span id = "wallet">Money: $1000</span>
+  </div>
+  <div style = "font-size: 25px" class = "textbox" id="textbox">
+  </div>
 </body>
-
 </html>
-<script>
 
+<script>
   var connection = null;
 
   var serverUrl;
@@ -51,12 +44,13 @@
   var cardIdx = 0;
   var playerID = 0;
   let money = 0;
+
+  //When client receives data from server
   connection.onmessage = function (evt) {
     var msg;
     msg = evt.data;
 
-    console.log("Message received: ");
-    document.getElementById("textbox").innerText = document.getElementById("textbox").innerText + '\n\n' + "Message Received" + "\n" + msg;
+    console.log("Message received: " + msg);
 
     // This is a hack for this example.
     // The only time the WebPoker server sends data just
@@ -67,64 +61,21 @@
 
     // Take the msg and turn it into a javascript object
     const obj = JSON.parse(msg);
-    if (!obj.players) {
-
-      playerID = obj.Id;
-      console.log("player ID = " + playerID);
-      document.getElementById("textbox").innerText =
-        document.getElementById("textbox").innerText + '\n\n' + "Player ID is " + playerID;
-    }
-    else {
-
-      // process the game state
-      // this will just have one card change every time a new game state comes in.
-      // the term LUT means "look up table".  you will see it sometimes in code written last 
-      // century.
-      cardLUT = ["3C.svg", "2B.svg", "3S.svg", "KC.svg", "6D.svg", "2J.svg", "2S.svg"];
-      document.getElementById("card4").src = cardLUT[cardIdx];
-      cardIdx = cardIdx + 1;
-      if (cardIdx > 6)
-        cardIdx = 0;
-    }
-    console.log("the cardIdx is " + cardIdx)
   }
 
-  function send() {
-
+  function join(){
     var msg = {
-      text: document.getElementById("send_text").value,
+      event: "JOIN",
+      playerID: JSON.playerID,
+      name: document.getElementById("send_name").value
     };
     connection.send(JSON.stringify(msg));
-    console.log(JSON.stringify(msg));
-  }
-  
-  function raise(){
-    money += 10;
-    textbox.textContent = "Money:$" + money;
-  }
-  function sendName() {
-
-    var msg = {
-      event: "NAME",
-      name: document.getElementById("sendName").value,
-      playerID: JSON.PlayerID
-    };
-    connection.send(JSON.stringify(msg));
-    console.log(JSON.stringify(msg));
-
-  
-    // this shows how to hid html elements.
-    // like when the name is entered
-    //  it might be better to hide after the server has accepted it
-    // but this is just a demonstration
-
-    var x = document.getElementById("nameInput");
-    if (x.style.display === "none") {
-      x.style.display = "block";
-    } else {
-      x.style.display = "none";
-    }
-
+    var x = document.getElementById("send_name");
+    x.style.display = "none";
+    var y = document.getElementById("join_button");
+    y.parentNode.removeChild(y);
+    var z = document.getElementById("player1");
+    z.style.display = "initial";
   }
   
 </script>

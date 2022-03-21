@@ -20,7 +20,6 @@ public class Player {
             Cards[i].suite = Card.Suite.valueOf("SPADES");
             Cards[i].value = Card.Value.valueOf("FIVE");
         }
-
     }
 
     public void SetName(String N) {
