@@ -10,12 +10,76 @@
 </head>
 
 <body>
-  <div class = "row">
-    <div class = "column" id = "player1" style = "display:none">
-      <img src = "PlayerPicture.png" style = "width:25%">
-      <p class = "player_name">name here</p>
+  <div id = "tutorial" class = "overlay">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <div class = "tutorial_content">
+      <p style = "font-weight:bold; font-size:80px">Five-Card Draw Tutorial </p> 
+      <p class = "heading">
+        Ranking System (Best to Worst):
+      </p>
+      <p class = "content_rules">
+        1. Straight Flush - 5 cards of same suit in numeric sequence<br>
+        2. Four of a Kind - 4 cards of matching value<br>
+        3. Full House - 3 of a kind & a pair of another<br>
+        4. Flush - 5 cards of matching suit<br>
+        5. Straight - 5 cards of any suit in numeric sequence<br>
+        6. Three of a Kind - 3 cards of matching value<br>
+        7. Two Pair - 2 pairs of matching value<br>
+        8. Pair - 1 pair of matching value<br>
+        9. High Card - highest valued card wins if no better hand is made<br>
+      </p>
+        5 Card Draw vs Texas Hold Em Main Differences<br>
+        - Initially must provide a mandatory bet known as Ante (varies)<br>
+        - No community pool of cards<br>
+        - Restricted to the initial 5 cards you are dealt<br>
+        - Through 4 rounds, players can make bets and get rid of cards to strengthen their hands<br>
+        4 Total Rounds<br>
+        1. 1st Betting Round<br>
+        2. Draw Round - players can get rid of cards to get new ones<br>
+        3. 2nd Betting Round<br>
+        4. Showdown - best hand wins; winner takes all<br>
+        Betting Rounds (Round 1 & 3)<br>
+        - You are able to check, call, raise, or fold like Texas Hold Em<br>
+        - If everyone checks in first round, it automatically adds additional ante from everyone<br>
+        Draw Round (Round 2)<br>
+        - Ask dealer to replace cards in your hand (which ones and how many)<br>
+        - Max number to replace usually being 3 but other variations exist such as:<br>
+        - 4 Max if 5th is a wild cards (Ace)<br>
+        - No limit, flush entire hand to get new set of cards<br>
+        - Give dealer your cards concealed (All card “transactions” are concealed essentially)<br>
+        - Not obligated to draw any new cards, you can decline i.e., Standing Pat, not taking any<br>
+        new cards in the draw<br>
+        Other Rules
+        - First option goes to p<br>layer left of dealer, whether to check or bet<br>
+        - Check: Forgo option to make a bet to the next player to the left<br>
+        - Bet: Make a bet (there may be pot limits at a table)</p>
     </div>
   </div>
+  <div class= = "container">
+    <div class = "row">
+      <div class = "column" id = "player1" style = "visibility:hidden" >
+        <img src = "PlayerPicture.png" style = "width:auto">
+        <span class = "player_name" >name here</span>
+      </div>
+      <div class = "column" id = "player2" style = "visibility:hidden" >
+        <img src = "PlayerPicture.png" style = "width:auto">
+        <span class = "player_name" >name here</span>
+      </div>
+      <div class = "column" id = "player3" style = "visibility:hidden" >
+        <img src = "PlayerPicture.png" style = "width:auto">
+        <span class = "player_name" >name here</span>
+      </div>
+      <div class = "column" id = "player4" style = "visibility:hidden" >
+        <img src = "PlayerPicture.png" style = "width:auto">
+        <span class = "player_name" >name here</span>
+      </div>
+      <div class = "column" id = "player5" style = "visibility:hidden" >
+        <img src = "PlayerPicture.png" style = "width:auto">
+        <span class = "player_name" >name here</span>      
+      </div>
+    </div>
+  </div>
+
   <p class = "lobby">
     <input class = "input_box" id="send_name" type="text" placeholder = "Enter name here">
     <input class = "lobby_button" id = "join_button" type="button" name="join_button" value="Join" onclick="join()">
@@ -70,12 +134,24 @@
       name: document.getElementById("send_name").value
     };
     connection.send(JSON.stringify(msg));
-    var x = document.getElementById("send_name");
-    x.style.display = "none";
-    var y = document.getElementById("join_button");
-    y.parentNode.removeChild(y);
-    var z = document.getElementById("player1");
-    z.style.display = "initial";
+    var name_input = document.getElementById("send_name");
+    name_input.style.display = "none";
+    var join_btn = document.getElementById("join_button");
+    join_btn.parentNode.removeChild(join_btn);
+    var columns = document.getElementsByClassName("column");
+    for(let i = 0; i < 5; i++){
+      if(columns[i].style.visibility == "visible"){
+        columns[i].style.visibility = "hidden";
+      }else if(columns[i].style.visibility == "hidden"){
+        columns[i].style.visibility = "visible";
+      }
+    }
+  }
+  function tutorial(){
+    document.getElementById("tutorial").style.width = "100%"
   }
   
+  function closeNav() {
+    document.getElementById("tutorial").style.width = "0%";
+  }
 </script>
