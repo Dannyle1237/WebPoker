@@ -6,6 +6,8 @@ import com.google.gson.GsonBuilder;
 public class Player {
     int Id;
     String Name;
+    int money;
+    boolean ready = false;
     uta.cse3310.Card Cards[];
     String LastMessageToPlayer;
 
@@ -15,14 +17,17 @@ public class Player {
         // there is a lot smarter ways to do this,
         // but at least this is obvious
         Cards = new Card[5];
-        for (int i = 0; i < 5; i++) {
+        /*for (int i = 0; i < 5; i++) {
             Cards[i] = new Card();
             Cards[i].suite = Card.Suite.valueOf("SPADES");
             Cards[i].value = Card.Value.valueOf("FIVE");
-        }
+        }*/
     }
 
-    public void SetName(String N) {
+    public void setMoney(int dollars){
+        money = dollars;
+    }
+    public void setName(String N) {
         Name = N;
         LastMessageToPlayer="Welcome " + N + " to the game.";
     }

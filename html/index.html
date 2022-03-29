@@ -11,12 +11,10 @@
 
 <body>
   <div id = "tutorial" class = "overlay">
-    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+    <a href="javascript:void(0)" class="closebtn" onmousedown = "closeTutorial()">&times;</a>
     <div class = "tutorial_content">
-      <p style = "font-weight:bold; font-size:80px">Five-Card Draw Tutorial </p> 
-      <p class = "heading">
-        Ranking System (Best to Worst):
-      </p>
+      <p style = "font-weight:bold; font-size:80px">Five-Card Draw Tutorial</p> 
+      <p class = "heading">Ranking System (Best to Worst)</p>
       <p class = "content_rules">
         1. Straight Flush - 5 cards of same suit in numeric sequence<br>
         2. Four of a Kind - 4 cards of matching value<br>
@@ -28,17 +26,22 @@
         8. Pair - 1 pair of matching value<br>
         9. High Card - highest valued card wins if no better hand is made<br>
       </p>
-        5 Card Draw vs Texas Hold Em Main Differences<br>
+      <p class = "heading">5 Card Draw vs Texas Hold Em Main Differences</p>
+      <p class = "content_rules">
         - Initially must provide a mandatory bet known as Ante (varies)<br>
         - No community pool of cards<br>
         - Restricted to the initial 5 cards you are dealt<br>
         - Through 4 rounds, players can make bets and get rid of cards to strengthen their hands<br>
-        4 Total Rounds<br>
+      </p>
+      <p class = "heading">4 Total Rounds</p>
+      <p class = "content_rules">
         1. 1st Betting Round<br>
         2. Draw Round - players can get rid of cards to get new ones<br>
         3. 2nd Betting Round<br>
         4. Showdown - best hand wins; winner takes all<br>
-        Betting Rounds (Round 1 & 3)<br>
+      </p>
+      <p class = "heading">Betting Rounds (Round 1 & 3)</p>
+      <p class = "content_rules">
         - You are able to check, call, raise, or fold like Texas Hold Em<br>
         - If everyone checks in first round, it automatically adds additional ante from everyone<br>
         Draw Round (Round 2)<br>
@@ -49,33 +52,38 @@
         - Give dealer your cards concealed (All card “transactions” are concealed essentially)<br>
         - Not obligated to draw any new cards, you can decline i.e., Standing Pat, not taking any<br>
         new cards in the draw<br>
-        Other Rules
-        - First option goes to p<br>layer left of dealer, whether to check or bet<br>
+      </p>
+      <p class = "heading">Other Rules</p>
+      <p class = "content_rules">
+        - First option goes to player left of dealer, whether to check or bet<br>
         - Check: Forgo option to make a bet to the next player to the left<br>
-        - Bet: Make a bet (there may be pot limits at a table)</p>
+        - Bet: Make a bet (there may be pot limits at a table)
+      </p>
+
     </div>
   </div>
+
   <div class= = "container">
     <div class = "row">
       <div class = "column" id = "player1" style = "visibility:hidden" >
-        <img src = "PlayerPicture.png" style = "width:auto">
-        <span class = "player_name" >name here</span>
+        <img src = "PlayerPicture.png" style = "width:100%">
+        <span class = "player_name" id = "player1_name" >name here</span>
       </div>
       <div class = "column" id = "player2" style = "visibility:hidden" >
-        <img src = "PlayerPicture.png" style = "width:auto">
-        <span class = "player_name" >name here</span>
+        <img src = "PlayerPicture.png" style = "width:100%">
+        <span class = "player_name" id = "player2_name">name here</span>
       </div>
       <div class = "column" id = "player3" style = "visibility:hidden" >
-        <img src = "PlayerPicture.png" style = "width:auto">
-        <span class = "player_name" >name here</span>
+        <img src = "PlayerPicture.png" style = "width:100%">
+        <span class = "player_name" id = "player3_name">name here</span>
       </div>
       <div class = "column" id = "player4" style = "visibility:hidden" >
-        <img src = "PlayerPicture.png" style = "width:auto">
-        <span class = "player_name" >name here</span>
+        <img src = "PlayerPicture.png" style = "width:100%">
+        <span class = "player_name" id = "player4_name">name here</span>
       </div>
       <div class = "column" id = "player5" style = "visibility:hidden" >
-        <img src = "PlayerPicture.png" style = "width:auto">
-        <span class = "player_name" >name here</span>      
+        <img src = "PlayerPicture.png" style = "width:100%">
+        <span class = "player_name" id = "player5_name">name here</span>      
       </div>
     </div>
   </div>
@@ -84,12 +92,22 @@
     <input class = "input_box" id="send_name" type="text" placeholder = "Enter name here">
     <input class = "lobby_button" id = "join_button" type="button" name="join_button" value="Join" onclick="join()">
     <input class = "lobby_button" id = "tutorial_button" type="button" name="tutorial_button" value="Tutorial" onclick="tutorial()">
+    <label class="switch" id = "switch" style = "visibility:hidden">
+      <input type="checkbox" id = "ready_switch" onclick ="ready()">
+      <span class="slider round">YES   NO</span>
+    </label>
   </p>
 
   <div class = "gameStatus" id="gameStatus">
     <span id = "wallet">Money: $1000</span>
   </div>
   <div style = "font-size: 25px" class = "textbox" id="textbox">
+  </div>
+
+  <div class = "overlay" id = "timer_overlay" >
+    <div class = "timer_content" >
+      <p class = "timer" id = "timer">Game starting: 5</p>
+    </div>
   </div>
 </body>
 </html>
@@ -100,7 +118,7 @@
   var serverUrl;
   serverUrl ="ws://" + window.location.hostname + ":8880";
   console.log("URL IS " + serverUrl);
-  connection = new WebSocket(serverUrl, "json");
+  connection = new WebSocket(serverUrl);
   connection.onopen = function (evt) {
     console.log("open");
   }
@@ -108,50 +126,117 @@
   var cardIdx = 0;
   var playerID = 0;
   let money = 0;
-
+  var numPlayers = 0;
+  var joined = 0;
+  var name;
   //When client receives data from server
   connection.onmessage = function (evt) {
     var msg;
     msg = evt.data;
-
     console.log("Message received: " + msg);
-
-    // This is a hack for this example.
-    // The only time the WebPoker server sends data just
-    // to this client is at the beginging, when the connection
-    // is first made.  The first communication tells us which
-    // connection number we are, which is very import.
-    // So, we detect this situation where it is not game state
-
-    // Take the msg and turn it into a javascript object
     const obj = JSON.parse(msg);
+
+    //We want to see if game has started first, 
+    //so we can speed up the process and ignore other
+    //conditions since .started only triggers with 
+    //the toggle button
+    if(obj.started == true){
+      document.getElementById("switch").style.visibility = "hidden";
+      start();
+    }
+    else{
+      if(obj.your_ID){
+        playerID = obj.Id;       
+        console.log("Player id is now " + playerID); 
+      }
+      if(obj.numPlayers){
+        console.log("numPlayersChanging: " + obj.numPlayers);
+        numPlayers = obj.numPlayers;
+        if(joined){
+          for(var i = 1; i <= numPlayers; i++){
+            var column = document.getElementById("player" + i);
+            column.style.visibility = "visible";
+          }
+        }
+      }
+      if(obj.playerNames){
+        for(var i = 0; i < numPlayers; i++){
+          //console.log("Players names be:" + obj.playerNames[i]);
+          var player_name = document.getElementById("player" + (i+1) + "_name");
+          player_name.innerText = obj.playerNames[i];
+        }
+      }
+    }
   }
 
   function join(){
+    name = document.getElementById("send_name").value;
     var msg = {
       event: "JOIN",
-      playerID: JSON.playerID,
-      name: document.getElementById("send_name").value
+      playerID: playerID,
+      name: name
     };
+    //Send message to WebPoker that new player has pressed join button
     connection.send(JSON.stringify(msg));
+
+    console.log("Name is: " + name);
+    document.getElementById("player" + playerID + "_name").innerText = name;
+
+    //Remove enter name text input and join button
     var name_input = document.getElementById("send_name");
     name_input.style.display = "none";
     var join_btn = document.getElementById("join_button");
     join_btn.parentNode.removeChild(join_btn);
-    var columns = document.getElementsByClassName("column");
-    for(let i = 0; i < 5; i++){
-      if(columns[i].style.visibility == "visible"){
-        columns[i].style.visibility = "hidden";
-      }else if(columns[i].style.visibility == "hidden"){
-        columns[i].style.visibility = "visible";
-      }
+
+    //Keep track if player has joined, in order to see
+    //if html needs to display players or not
+    joined = 1;
+
+    //for loop to display every player that is on
+    for(var i = 1; i <= numPlayers; i++){
+      var column = document.getElementById("player" + i);
+      column.style.visibility = "visible";
     }
+    var ready_btn = document.getElementById("switch");
+    ready_btn.style.visibility = "visible";
   }
   function tutorial(){
     document.getElementById("tutorial").style.width = "100%"
   }
   
-  function closeNav() {
+  function closeTutorial() {
     document.getElementById("tutorial").style.width = "0%";
+  }
+
+  function ready(){
+    var ready_switch = document.getElementById("ready_switch");
+    var msg = {
+      event: "READY",
+      playerID: playerID,
+      status: ready_switch.checked
+    }
+    connection.send(JSON.stringify(msg));
+  }
+
+  async function start(){
+    document.getElementById("timer_overlay").style.width = "100%";
+    var timer_text = document.getElementById("timer");
+    for(var i = 5; i >= 0; i += 0){
+      setTimer(timer_text, i);
+      await delay(1);
+      i--;
+    }
+    document.getElementById("timer_overlay").style.width = "0%";
+  }
+
+  function delay(n){
+    return new Promise(function(resolve){
+      setTimeout(resolve, n*1000);
+    });
+  }
+
+  async function setTimer(timer_text, i){
+    await delay(1);
+    timer_text.innerHTML = "Game starting:" + i;
   }
 </script>

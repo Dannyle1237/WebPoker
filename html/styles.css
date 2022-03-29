@@ -42,14 +42,14 @@
 
 .player_name{
     display:block;
-    position: relative; right: -80px;
-    font-size: 45px;
+    position: relative; right: 0px;
+    font-size: 40px;
 }
-
+/*Code for overlay for tutorial is taken from www.quanzhanketang.com how to make fullscreen overlay tutorial*/
 .overlay {
     /* Height & width depends on how you want to reveal the overlay (see JS below) */   
     height: 100%;
-    width: 0;
+    width: 0%;
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
     left: 0;
@@ -73,20 +73,101 @@
 /* Position the close button (top right corner) */
 .overlay .closebtn {
     position: absolute;
-    top: 20px;
-    right: 45px;
+    top: 10px;
+    right: 20px;
     font-size: 60px;
+    z-index:1000;
 }
 
 .heading{
     font-size: 40px;
     font-weight: bold;
     text-decoration: underline;
+    position: relative;
+    text-align: left;
+    left: 20%;
 }
 
 .content_rules{
     position: relative;
-    left: 30%;
+    left: 20%;
     text-align: left;
-
 }
+
+.timer_content{
+    position: relative;
+    top: -15%;
+    width: 100%; /* 100% width */
+    text-align: center; /* Centered text/links */
+    margin-top: 0px; 
+    color: white;
+    font-size: 270px;
+    font-weight: bold;
+}
+
+.timer{
+    position: relative;
+    text-align: center;
+}
+/*Toggle button code taken from w3schools.com 
+howto css switch*/
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    top: -15px;
+  }
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2196F3;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+    padding-top:9px;
+    font-size: 13px;
+}   
+
+.slider.round:before {
+    border-radius: 50%;
+}
+

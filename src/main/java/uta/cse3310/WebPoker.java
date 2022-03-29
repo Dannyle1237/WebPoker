@@ -83,6 +83,7 @@ public class WebPoker extends WebSocketServer {
     // Since this is a new connection, it is also a new player
     numPlayers = numPlayers + 1; // player id's start at 1
     player = new Player(numPlayers);
+    player.setMoney(1000);
     if (numPlayers == 1) {
       System.out.println("starting a new game");
       game = new Game();
@@ -90,12 +91,15 @@ public class WebPoker extends WebSocketServer {
 
     // this is the only time we send info to a single client.
     // it needs to know it's player ID.
-    conn.send(player.asJSONString());
+    conn.send("{\"your_ID\":" + player.Id + "," + player.asJSONString().substring(1));
     game.addPlayer(player);
 
     // and as always, we send the game state to everyone
+    //and allow every client to know how many players are in the game
     broadcast(game.exportStateAsJSON());
+    broadcast(game.exportNumPlayersAsJSON());
     System.out.println("the game state" + game.exportStateAsJSON());
+    System.out.println("The num of players" + game.exportNumPlayersAsJSON());
   }
 
   @Override
@@ -113,8 +117,11 @@ public class WebPoker extends WebSocketServer {
     game.processMessage(message);
     // and the results of that message are sent to everyone
     // as the "state of the game"
-
+    game.allPlayersReady();
     broadcast(game.exportStateAsJSON());
+    broadcast(game.exportPlayerNamesAsJson());
+    System.out.println("The names of players" + game.exportPlayerNamesAsJson());
+
     System.out.println(conn + ": " + message);
   }
 
