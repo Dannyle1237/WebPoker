@@ -44,6 +44,7 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.drafts.Draft_6455;
 import org.java_websocket.handshake.ClientHandshake;
 import org.java_websocket.server.WebSocketServer;
+import java.util.ArrayList;
 
 /**
  * A simple WebSocketServer implementation. Keeps track of a "chatroom".
@@ -93,11 +94,11 @@ public class WebPoker extends WebSocketServer {
     // it needs to know it's player ID.
     conn.send("{\"your_ID\":" + player.Id + "," + player.asJSONString().substring(1));
     game.addPlayer(player);
-
     // and as always, we send the game state to everyone
     //and allow every client to know how many players are in the game
     broadcast(game.exportStateAsJSON());
     broadcast(game.exportNumPlayersAsJSON());
+
     System.out.println("the game state" + game.exportStateAsJSON());
     System.out.println("The num of players" + game.exportNumPlayersAsJSON());
   }
@@ -112,12 +113,25 @@ public class WebPoker extends WebSocketServer {
 
   @Override
   public void onMessage(WebSocket conn, String message) {
+    
     System.out.println("onMessage received");
     // all incoming messages are processed by the game
-    game.processMessage(message);
+    if(game.processMessage(message) == UserEvent.UserEventType.SEND_HAND){
+      conn.send(game.exportPlayerRequestedDeck(message));
+      /*
+      Sent this command when we need to tell clients who won
+      conn.send(String.valueOf(game.bestHand()));
+      */
+    };
+
+    //We must continously check
+    //if all players are ready to know when to start 
+    if(!game.started){
+      game.allPlayersReady();
+    }
+
     // and the results of that message are sent to everyone
     // as the "state of the game"
-    game.allPlayersReady();
     broadcast(game.exportStateAsJSON());
     broadcast(game.exportPlayerNamesAsJson());
     System.out.println("The names of players" + game.exportPlayerNamesAsJson());

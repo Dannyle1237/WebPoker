@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 public class UserEvent {
 
     public enum UserEventType {
-        NAME, STAND, HIT, CALL, JOIN, LEAVE, READY;
+        NAME, STAND, HIT, CALL, JOIN, LEAVE, READY, SEND_HAND;
 
         private UserEventType() {
         }
