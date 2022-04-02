@@ -5,7 +5,7 @@
 <head>
   <title>WebPoker Game</title>
   <link rel = "stylesheet" href="styles.css" >
-  <p class = "title" > Welcome to our WebPoker Game!</p>
+  <p class = "title" id = "title"> Welcome to our WebPoker Game!</p>
 
 </head>
 
@@ -98,10 +98,6 @@
         <span class="slider round">YES   NO</span>
       </label>
     </p>
-
-    <div class = "gameStatus" id="gameStatus">
-      <span id = "wallet">Money: $1000</span>
-    </div>
     <div style = "font-size: 25px" class = "textbox" id="textbox">
     </div>
 
@@ -112,7 +108,49 @@
     </div>
   </div>
   <div id = "middle" style = "display:none">
-    <p>Testing testing this is where the ingame page goes</p>
+    <div class="centerpot">
+      <p id = "Pot">Pot: $10</p>
+      <p id = "Call">Call: $0</p>
+      <button class = "playable_button" id = "check_button" onclick = "check()">Check</button>
+      <button class = "playable_button" id = "call_button"  onclick = "callFunct()">Call</button>
+      <button class = "playable_button" id = "fold_button"  onclick = "fold()">Fold</button>
+      <input id="raise_amount" type="number" placeholder = "Enter amount to raise">
+      <button class = "playable_button" id = "raise_button" onclick = "raise()">Raise</button>
+      <button id = "swap_button" onclick = "sendSwap()" disabled = "true">Click when done choosing cards</button>
+    </div>
+    
+    <div class="usercards">
+      <img id="card1" src="3C.svg" style="width:130px;" onclick = "swap(this)">
+      <img id="card2" src="3D.svg" style="width:130px;" onclick = "swap(this)">
+      <img id="card3" src="3H.svg" style="width:130px;" onclick = "swap(this)">
+      <img id="card4" src="4C.svg" style="width:130px;" onclick = "swap(this)">
+      <img id="card5" src="5C.svg" style="width:130px;" onclick = "swap(this)">
+    </div>
+    
+    <div class="topplayercards">
+      <img id="pCard1" src="2B.svg" style="width:130px;">
+      <img id="pCard2" src="2B.svg" style="width:130px;">
+      <img id="pCard3" src="2B.svg" style="width:130px;">
+      <img id="pCard4" src="2B.svg" style="width:130px;">
+      <img id="pCard5" src="2B.svg" style="width:130px;">
+    </div>
+    <div class="leftside">
+      <img class="sidecard1 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard2 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard3 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard4 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard5 rotate" id="card5" src="2B.svg" style="width:100px;">
+    </div>
+    <div class="rightside">
+      <img class="sidecard1 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard2 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard3 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard4 rotate" id="card5" src="2B.svg" style="width:100px;">
+      <img class="sidecard5 rotate" id="card5" src="2B.svg" style="width:100px;">
+    </div>
+    <div class="balancedisplay">
+      <p id = "Balance">Balance: $1000</p>
+    </div>
   </div>
 </body>
 </html>
@@ -131,11 +169,18 @@
   var cardIdx = 0;
   var playerID = 0;
   var started = false;
-  let money = 1000;
+  let money = 0;
   var numPlayers = 0;
   var joined = 0;
-  var name, hand;
-
+  var hand = [];
+  var swapCard1 = false;
+  var swapCard2 = false;
+  var swapCard3 = false;
+  var swapCard4 = false;
+  var swapCard5 = false;
+  var swapping = false;
+  var name, call, round;
+  var folded = false;
   //When client receives data from server
   connection.onmessage = function (evt) {
     var msg;
@@ -163,7 +208,7 @@
         console.log("Player id is now " + playerID); 
       }
       if(obj.numPlayers){
-        console.log("numPlayersChanging: " + obj.numPlayers);
+        //console.log("numPlayersChanging: " + obj.numPlayers);
         numPlayers = obj.numPlayers;
         if(joined){
           for(var i = 1; i <= numPlayers; i++){
@@ -180,11 +225,69 @@
         }
       }
       if(obj.your_hand){
-        hand = JSON.stringify(obj.your_hand);
+        hand = [];
+        for(var i in obj.your_hand){
+          hand.push(obj.your_hand[i]);
+        }
+        displayCards();
+        //console.log("Hand Variable in JSON: " + JSON.stringify(hand));
+      }
+      
+      if(obj.players_money){
+        money = obj.players_money[playerID-1];
+        updateMoney(money);
+      }
+      //Constantly update the pot
+      if(obj.pot){
+        document.getElementById("Pot").innerText = "Pot: $" + obj.pot;
+      }
+      if(obj.calls){
+        console.log("Call = " + obj.calls[playerID - 1]);
+        call = obj.calls[playerID - 1];
+        if(call <= 0){
+          document.getElementById("Call").innerText = "Call: $0";
+        }
+        else{
+          document.getElementById("Call").innerText = "Call: $" + call;
+        }
+      }
+      if(obj.turn){
+        round = obj.round;
+        if(round == 0 || round == 2){
+          var playable_buttons = document.querySelectorAll(".playable_button");
+          if(obj.turn == playerID){
+            console.log("Your turn");
+            playable_buttons.forEach((button) => {
+              console.log("Enabling all buttons");
+              button.disabled = false;
+            })
+            if(call <= 0){
+              console.log("disabling call button");
+              document.getElementById("call_button").disabled = true;
+            }
+            else{
+              console.log("disabling check button");
+              document.getElementById("check_button").disabled = true;
+            }
+          }
+          else{
+            playable_buttons.forEach((button) => {
+            button.disabled = true;
+            })
+          }
+        }
+        if(obj.round == 1){
+          var playable_buttons = document.querySelectorAll(".playable_button");
+          playable_buttons.forEach((button) => {
+            button.disabled = true;
+          });
+          swapping = true;
+          var swap_button = document.getElementById("swap_button");
+          swap_button.disabled = false;
+        }
       }
     }
   }
-
   function join(){
     name = document.getElementById("send_name").value;
     var msg = {
@@ -216,10 +319,10 @@
     var ready_btn = document.getElementById("switch");
     ready_btn.style.visibility = "visible";
   }
+
   function tutorial(){
     document.getElementById("tutorial").style.width = "100%"
   }
-  
   function closeTutorial() {
     document.getElementById("tutorial").style.width = "0%";
   }
@@ -237,7 +340,7 @@
   async function start(){
     document.getElementById("timer_overlay").style.width = "100%";
     var timer_text = document.getElementById("timer");
-    for(var i = 5; i >= 0; i += 0){
+    for(var i = 1; i >= 0; i += 0){
       setTimer(timer_text, i);
       await delay(1);
       i--;
@@ -246,9 +349,22 @@
     //Now we hide the lobby screen after time
     var screen = document.getElementById("beginning");
     var screen2 = document.getElementById("middle");
+    var title = document.getElementById("title");
+    displayCards();
+
+    //If not first player, automatically disabled buttons at start
+    if(playerID != 1){
+      var playable_buttons = document.querySelectorAll(".playable_button");
+      playable_buttons.forEach((button) => {
+        button.disabled = true;
+      });
+    }
+    else{
+      document.getElementById("call_button").disabled = true;
+    }
     screen.style.display = "none";
     screen2.style.display = "revert";
-    
+    title.style.display = "none";
     //Set lobby screen back:
     //screen.style.display = "revert";
   }
@@ -262,5 +378,185 @@
   async function setTimer(timer_text, i){
     await delay(1);
     timer_text.innerHTML = "Game starting: " + i;
+  }
+
+  function check(){
+    var msg = {
+      event: "MOVE",
+      move: "CHECK",
+      playerID: playerID
+    }
+    connection.send(JSON.stringify(msg));
+  }
+
+  function callFunct(){
+    var msg = {
+      event: "MOVE",
+      move: "CALL",
+      playerID: playerID
+    }
+    connection.send(JSON.stringify(msg));
+  }
+
+  function fold(){
+    var msg = {
+      event: "MOVE",
+      move: "FOLD",
+      playerID: playerID
+    }
+    connection.send(JSON.stringify(msg));
+  }
+
+  function raise(){
+    var amt = document.getElementById("raise_amount").value;
+    var msg = {
+      event:"MOVE",
+      move:"RAISE",
+      raise: amt,
+      playerID: playerID
+    }
+    connection.send(JSON.stringify(msg));
+  }
+  function updateMoney(amount){
+    var balance = document.getElementById("Balance");
+        balance.innerText = "Balance: $" + amount;
+        console.log("Money now: " + amount);
+  }
+
+  function swap(card){
+    if(round == 1 && swapping){
+      console.log("Card element as: " + card.id);
+      if(card.style.width == "130px"){
+        switch(card.id){
+          case "card1":
+            swapCard1 = true;
+            break;
+          case "card2":
+            swapCard2 = true;
+            break;
+          case "card3":
+            swapCard3 = true;
+            break;
+          case "card4":
+            swapCard4 = true;
+            break;
+          case "card5":
+            swapCard5 = true;
+            break;
+        }
+        card.style.width = "150px";
+      }
+      else{
+        card.style.width = "130px";
+        switch(card.id){
+          case "card1":
+            swapCard1 = false;
+            break;
+          case "card2":
+            swapCard2 = false;
+            break;
+          case "card3":
+            swapCard3 = false;
+            break;
+          case "card4":
+            swapCard4 = false;
+            break;
+          case "card5":
+            swapCard5 = false;
+            break;
+        }
+      }
+    }
+    for(var i = 0; i < 5; i++){
+
+    }
+  }
+
+  function sendSwap(){
+    document.getElementById("swap_button").disabled = true;
+    swapping = false;
+    var msg = {
+      event: "SWAP",
+      playerID: playerID,
+      swapCard1: swapCard1,
+      swapCard2: swapCard2,
+      swapCard3: swapCard3,
+      swapCard4: swapCard4,
+      swapCard5: swapCard5
+    }
+    connection.send(JSON.stringify(msg));
+    var cards;
+    for(var i = 1; i <= 5; i++){
+      cards = document.getElementById("card" + i);
+      cards.style.width = "130px";
+    }
+  }
+
+  function displayCards(){
+    var cardView, card;
+
+    for(var i = 0; i < 5; i++){
+      card = "";
+      cardView = document.getElementById("card" + (i+1));
+      //console.log("hand[i]: " + JSON.stringify(hand[i]));
+      switch(hand[i]["value"]){
+        case "TWO": 
+          card += "2";
+          break;
+        case "THREE": 
+          card += "3";
+          break;
+        case "FOUR": 
+          card += "4";
+          break;
+        case "FIVE": 
+          card += "5";
+          break;    
+        case "SIX": 
+          card += "6";
+          break;
+        case "SEVEN": 
+          card += "7";
+          break;
+        case "EIGHT": 
+          card += "8";
+          break;  
+        case "NINE": 
+          card += "9";
+          break;  
+        case "TEN": 
+          card += "T";
+          break;  
+        case "JACK": 
+          card += "J";
+          break;  
+        case "QUEEN": 
+          card += "Q";
+          break;  
+        case "KING": 
+          card += "K";
+          break;  
+        case "ACE": 
+          card += "A";
+          break;        
+      }
+      switch(hand[i]["suite"]){
+        case "CLUBS":
+          card += "C";
+          break;
+        case "SPADES":
+          card += "S";
+          break;
+        case "DIAMONDS":
+          card += "D";
+          break;
+        case "HEARTS":
+          card += "H";
+          break;
+      }
+      card += ".svg";
+      console.log(card);
+      cardView.src = card;
+    }
   }
 </script>

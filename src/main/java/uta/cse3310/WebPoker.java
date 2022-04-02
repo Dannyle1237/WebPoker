@@ -73,11 +73,6 @@ public class WebPoker extends WebSocketServer {
 
   @Override
   public void onOpen(WebSocket conn, ClientHandshake handshake) {
-    // conn.send("Welcome to the server!"); // This method sends a message to the
-    // new client
-    // broadcast("new connection: " + handshake
-    // .getResourceDescriptor()); // This method sends a message to all clients
-    // connected
     System.out.println(
         conn.getRemoteSocketAddress().getAddress().getHostAddress() + " connected");
 
@@ -90,8 +85,7 @@ public class WebPoker extends WebSocketServer {
       game = new Game();
     }
 
-    // this is the only time we send info to a single client.
-    // it needs to know it's player ID.
+    //Use this to send a player's information straight to them
     conn.send("{\"your_ID\":" + player.Id + "," + player.asJSONString().substring(1));
     game.addPlayer(player);
     // and as always, we send the game state to everyone
@@ -116,23 +110,36 @@ public class WebPoker extends WebSocketServer {
     
     System.out.println("onMessage received");
     // all incoming messages are processed by the game
-    if(game.processMessage(message) == UserEvent.UserEventType.SEND_HAND){
+    UserEvent.UserEventType event = game.processMessage(message);
+    if(event == UserEvent.UserEventType.SEND_HAND){
       conn.send(game.exportPlayerRequestedDeck(message));
       /*
       Sent this command when we need to tell clients who won
       conn.send(String.valueOf(game.bestHand()));
       */
-    };
-
+    }
+    if(event == UserEvent.UserEventType.SWAP){
+      conn.send(game.exportPlayerRequestedDeck(message));
+      if(game.allPlayersSwapped()){
+        game.round = 2;
+        broadcast(game.exportTurn());
+      }
+    }
+    if(event == UserEvent.UserEventType.MOVE){
+      broadcast(game.exportTurn());
+      broadcast(game.exportPlayersMoney());
+    }
     //We must continously check
     //if all players are ready to know when to start 
     if(!game.started){
-      game.allPlayersReady();
+      if(game.allPlayersReady()){
+        broadcast("{\"started\": true}");
+        broadcast(game.exportPlayersMoney());
+      }
     }
-
     // and the results of that message are sent to everyone
     // as the "state of the game"
-    broadcast(game.exportStateAsJSON());
+    //broadcast(game.exportStateAsJSON());
     broadcast(game.exportPlayerNamesAsJson());
     System.out.println("The names of players" + game.exportPlayerNamesAsJson());
 

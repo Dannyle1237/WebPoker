@@ -18,7 +18,11 @@ public class Game {
     String[] suites = {"HEARTS", "CLUBS", "DIAMONDS", "SPADES"};
     String[] values = {"ACE", "TWO", "THREE", "FOUR", "FIVE", "SIX", "SEVEN", "EIGHT", "NINE","TEN", "JACK", "QUEEN", "KING"};
     int winner = 0;
-
+    int pot = 0;
+    int ante = 5;
+    int call = 0;
+    int round = 0; //Round id (o = 1st betting, 1 = drawing, 2 = final betting)
+    int[] playersMoney;
     boolean started = false;
     int turn; // player ID that has the current turn
 
@@ -57,6 +61,34 @@ public class Game {
         return gson.toJson(jsonObject);
     }
 
+    String exportPlayersMoney(){
+        Gson gson = new Gson();
+        playersMoney = new int[players.size()];
+        for(int i = 0; i < players.size(); i++){
+            playersMoney[i] = players.get(i).money;
+        }
+        String s = "{\"players_money\":" + gson.toJson(playersMoney) + "}";
+        JsonObject jsonObject = JsonParser.parseString(s).getAsJsonObject();
+        return gson.toJson(jsonObject);
+    }
+
+    String exportTurn(){
+        Gson gson = new Gson();
+        String s = "{\"round\":" + gson.toJson(round) + ",\"turn\":" + gson.toJson(turn) + ",\"pot\":" + pot + ",\"calls\":[" + players.get(0).call;
+        for(int i = 1; i < players.size(); i++){
+            s += "," + players.get(i).call;
+        }
+        s += "]}";
+        JsonObject jsonObject = JsonParser.parseString(s).getAsJsonObject();
+        return gson.toJson(jsonObject);
+    }
+
+    String exportRound(){
+        Gson gson = new Gson();
+        String s = "{\"round\":" + gson.toJson(round) + "}";
+        JsonObject jsonObject = JsonParser.parseString(s).getAsJsonObject();
+        return gson.toJson(jsonObject);
+    }
     public boolean addPlayer(Player p) {
         if(players.size() > maxPlayers){
             System.out.println("Too many players already");
@@ -96,6 +128,15 @@ public class Game {
         return start;
     }
 
+    public boolean allPlayersSwapped(){
+        boolean yes = true;
+        for(int i = 0; i < players.size(); i++){
+            if(players.get(i).swapping == true){
+                yes = false;
+            }
+        }
+        return yes;
+    }
     public UserEvent.UserEventType processMessage(String msg) {
 
         GsonBuilder builder = new GsonBuilder();
@@ -119,12 +160,80 @@ public class Game {
             players.get(event.playerID-1).ready = event.status;
         }
         if(event.event == UserEventType.SEND_HAND){
-
+        }
+        if(event.event == UserEventType.MOVE){
+            System.out.println("Player " + event.playerID + " is doing a move " + event.move);
+            if(event.move.equals("CHECK")){
+            }
+            if(event.move.equals("FOLD")){
+                players.get(event.playerID-1).folded = true;
+            }
+            if(event.move.equals("CALL")){
+                players.get(event.playerID-1).money -= players.get(event.playerID-1).call;
+                pot += players.get(event.playerID-1).call;
+                for(int i = 1; i <= players.size(); i++){
+                    if(i!= event.playerID){
+                        players.get(i-1).call += players.get(event.playerID-1).call;
+                    }
+                }
+                players.get(event.playerID-1).call = 0;
+            }
+            if(event.move.equals("RAISE")){
+                pot += event.raise;
+                players.get(event.playerID-1).money -= event.raise;
+                for(int i = 1; i <= players.size(); i++){
+                    if(i!= event.playerID){
+                        players.get(i-1).call += event.raise;
+                    }
+                    else{
+                        players.get(event.playerID-1).call -= event.raise;
+                    }
+                }
+            }
+            if(turn < players.size()){
+                turn ++;
+            }
+            else{
+                for(int i = 0; i < players.size(); i++){
+                    players.get(i).swapping = true;
+                }
+                round = 1;
+                turn = 1;
+            }
+            System.out.println("Game now on turn: " + turn);
+        }
+        if(event.event == UserEventType.SWAP){
+            System.out.println("Changing out player" + event.playerID + "hand");
+            if(event.swapCard1){
+                players.get(event.playerID-1).Cards[0] = draw();
+            }
+            if(event.swapCard2){
+                players.get(event.playerID-1).Cards[1] = draw();
+            }
+            if(event.swapCard3){
+                players.get(event.playerID-1).Cards[2] = draw();
+            }
+            if(event.swapCard4){
+                players.get(event.playerID-1).Cards[3] = draw();
+            }
+            if(event.swapCard5){
+                players.get(event.playerID-1).Cards[4] = draw();
+            }
+            players.get(event.playerID-1).swapping = false;
         }
         return event.event;
     }
 
     public void startGame(){
+        turn = 1;
+        call = 0;
+        for(int i = 0; i < players.size(); i++){
+            players.get(i).call = 0;
+            players.get(i).betted = 0;
+            players.get(i).money -= ante;
+            pot += ante;
+            players.get(i).folded = false;
+        }
         deck = initalizeDeck();
         printDeck();
         deal();
@@ -164,6 +273,13 @@ public class Game {
         }
     }
     
+    public Card draw(){
+        Random rand = new Random();
+        int random = rand.nextInt(deck.size());
+        Card randomCard = deck.get(random);
+        deck.remove(random);
+        return randomCard;
+    }
     public int bestHand(){ //Returns number ID of winner
         //We initalize the best hand to automatically be player 1's
         Player bestPlayer = players.get(0);

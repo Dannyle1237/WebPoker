@@ -2,11 +2,12 @@ package uta.cse3310;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.ArrayList;
 
 public class UserEvent {
 
     public enum UserEventType {
-        NAME, STAND, HIT, CALL, JOIN, LEAVE, READY, SEND_HAND;
+        NAME, JOIN, LEAVE, READY, SEND_HAND, MOVE, SWAP;
 
         private UserEventType() {
         }
@@ -14,8 +15,10 @@ public class UserEvent {
 
     UserEventType event;
     int playerID;
-    String name;
+    String name, move;
     boolean status;
+    int raise;
+    boolean swapCard1, swapCard2, swapCard3, swapCard4, swapCard5;
     public UserEvent() {
     }
 

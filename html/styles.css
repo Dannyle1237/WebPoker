@@ -171,3 +171,96 @@ input:checked + .slider {
     border-radius: 50%;
 }
 
+
+.center-screen {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    min-height: 100vh;
+}
+
+.centerpot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 250px;
+    height: 100px;
+    font-size: 20px;
+    text-align: center;
+    transform: translate(-50%, -50%);
+    border: 5px solid #000000;
+    background-color: #2a8d4b;
+    font-weight: bold;
+}
+
+.balancedisplay {
+    position: absolute;
+    bottom: 10px;
+    left: 16px;
+    font-size: 40px;
+    font-weight: bold;
+    color:rgb(222, 145, 0);
+}
+
+.usercards {
+    position: absolute;
+    bottom: 50px;
+    left:380px;
+    text-align: center;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.topplayercards {
+    position: absolute;
+    justify-content: center;
+    top: 70px;
+    left: 470px;
+}
+
+.rotate {
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    transform: rotate(90deg);
+}
+
+.sidecard1 {
+    position: absolute;
+    top: 55px;
+  }
+
+.sidecard2 {
+    position: absolute;
+    top: 160px; 
+}
+
+.sidecard3 {
+    position: absolute;
+    top: 265px; 
+}
+
+.sidecard4 {
+    position: absolute;
+    top: 370px; 
+}
+
+.sidecard5 {
+    position: absolute;
+    top: 475px;
+}
+
+.leftside {
+    padding-left: 180px;
+}
+
+.rightside {
+    padding-left: 1300px;
+}
+
+.gamebutton {
+    font-size: 16px;
+}

@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 public class Player {
-    int Id;
+    int Id, money, call;
     String Name;
-    int money;
+    int betted = 0;
     boolean ready = false;
+    boolean folded = false;
+    boolean swapping = false;
     uta.cse3310.Card Cards[];
     String LastMessageToPlayer;
 
