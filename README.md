@@ -39,9 +39,13 @@ https://www.me.uk/cards/makeadeck.cgi
 
 ## How to play
 1.)Go to URL http://webpoker.info:8083/
+
 2.)Enter name and then join lobby
+
 3.)Wait until at least another person joins the lobby, then ready up. 
+
 4.)Once both players are ready, the game will start!
+
 5.)Have the time of your life gambling fake money.
 
 
