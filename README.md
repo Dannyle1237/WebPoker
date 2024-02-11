@@ -1,6 +1,6 @@
 # WebPoker
 
-##Vision
+## Vision
 The goal of this project was to develop a multiplayer poker website that ensured the satisfaction of our stakeholder (in our case, the professor). 
 
 Throughout the project, emphasis was not only placed on technical implementation, but also on understanding and meeting the needs of the stakeholder. 
